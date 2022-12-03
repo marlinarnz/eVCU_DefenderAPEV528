@@ -19,6 +19,7 @@ private:
   void onMsgRcv(twai_message_t* pMsg);
   void onRemoteFrameRcv(twai_message_t* pMsg);
   void setBits(uint8_t* pByte, uint8_t lsb, uint8_t len, uint8_t val);
+  bool getBit(uint8_t* pByte, uint8_t bitNum);
   // CAN messages
   twai_message_t* m_pMsgVCU1;
 };

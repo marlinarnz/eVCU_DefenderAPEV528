@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <DeviceCAN.h>
+#include "GlobalParameters.h"
 
 
 /** Class to manage the CAN bus on this specific vehicle.
@@ -14,8 +15,12 @@ class CANManager : public DeviceCAN
 {
 public:
   CANManager(VehicleController* vc);
+  ~CANManager();
+  void begin();
+  void shutdown();
 
 private:
+  void onValueChanged(Parameter* pParam);
   void onMsgRcv(twai_message_t* pMsg);
   void onRemoteFrameRcv(twai_message_t* pMsg);
   void setBits(uint8_t* pByte, uint8_t lsb, uint8_t len, uint8_t val);

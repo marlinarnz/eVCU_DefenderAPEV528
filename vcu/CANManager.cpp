@@ -11,7 +11,10 @@ CANManager::CANManager(VehicleController* vc)
   m_pMsgVCU1 = new twai_message_t;
   m_pMsgVCU1->data_length_code = 8;
   m_pMsgVCU1->identifier = 0x101;
-  m_pMsgVCU1->data = {0,0,0,0,0,0,0,0x00^0xFF};
+  for (int i=0; i<7; i++) {
+    m_pMsgVCU1->data[i] = 0;    
+  }
+  m_pMsgVCU1->data[7] = 0^0xFF; // checksum
 }
 
 
@@ -58,6 +61,16 @@ void CANManager::begin()
 void CANManager::shutdown()
 {
   this->endSerialProtocol();
+  this->unregisterForValueChanged(101);
+  this->unregisterForValueChanged(104);
+  this->unregisterForValueChanged(105);
+  this->unregisterForValueChanged(106);
+  this->unregisterForValueChanged(107);
+  this->unregisterForValueChanged(108);
+  this->unregisterForValueChanged(112);
+  this->unregisterForValueChanged(113);
+  this->unregisterForValueChanged(114);
+  this->unregisterForValueChanged(115);
 }
 
 
@@ -66,47 +79,49 @@ void CANManager::shutdown()
  */
 void CANManager::onValueChanged(Parameter* pParam)
 {
-  // Switch through parameter IDs
-  switch (pParam->getId()) {
-    case 101:
-      m_pMsgVCU1->data[0] = (uint8_t)(pParam.getVal() / 0.3923);
-      break;
-    case 104:
-      setBits(m_pMsgVCU1->data[3], 29%8, 2, (uint8_t)(pParam.getVal()));
-      break;
-    case 105:
-      setBits(m_pMsgVCU1->data[4], 32%8, 1, (uint8_t)(pParam.getVal()));
-      break;
-    case 106:
-      setBits(m_pMsgVCU1->data[4], 33%8, 2, (uint8_t)(pParam.getVal()));
-      break;
-    case 107:
-      setBits(m_pMsgVCU1->data[4], 35%8, 1, (uint8_t)(pParam.getVal()));
-      break;
-    case 108:
-      setBits(m_pMsgVCU1->data[4], 36%8, 3, (uint8_t)(pParam.getVal()));
-      break;
-    case 112:
-      setBits(m_pMsgVCU1->data[5], 42%8, 2, (uint8_t)(pParam.getVal()));
-      break;
-    case 113:
-      setBits(m_pMsgVCU1->data[5], 44%8, 2, (uint8_t)(pParam.getVal()));
-      break;
-    case 114:
-      setBits(m_pMsgVCU1->data[5], 46%8, 2, (uint8_t)(pParam.getVal()));
-      break;
-    case 115:
-      setBits(m_pMsgVCU1->data[6], 52%8, 1, (uint8_t)(pParam.getVal()));
-      break;
-    default:
-      break;
+  if (pParam) {
+    // Switch through parameter IDs
+    switch (pParam->getId()) {
+      case 101:
+        m_pMsgVCU1->data[0] = (uint8_t)(throttlePosition.getVal() / 0.3923);
+        break;
+      case 104:
+        setBits(&(m_pMsgVCU1->data[3]), 29%8, 2, (uint8_t)(authenticationValid.getVal()));
+        break;
+      case 105:
+        setBits(&(m_pMsgVCU1->data[4]), 32%8, 1, (uint8_t)(vehicleReady.getVal()));
+        break;
+      case 106:
+        setBits(&(m_pMsgVCU1->data[4]), 33%8, 2, (uint8_t)(breakPositionMCU.getVal()));
+        break;
+      case 107:
+        setBits(&(m_pMsgVCU1->data[4]), 35%8, 1, (uint8_t)(mainRelayConnected.getVal()));
+        break;
+      case 108:
+        setBits(&(m_pMsgVCU1->data[4]), 36%8, 3, (uint8_t)(gearLeverPosition.getVal()));
+        break;
+      case 112:
+        setBits(&(m_pMsgVCU1->data[5]), 42%8, 2, (uint8_t)(vcuMotorOperationMode.getVal()));
+        break;
+      case 113:
+        setBits(&(m_pMsgVCU1->data[5]), 44%8, 2, (uint8_t)(vehicleWarningLevel.getVal()));
+        break;
+      case 114:
+        setBits(&(m_pMsgVCU1->data[5]), 46%8, 2, (uint8_t)(keyPosition.getVal()));
+        break;
+      case 115:
+        setBits(&(m_pMsgVCU1->data[6]), 52%8, 1, (uint8_t)(auxiliaryRelayConnected.getVal()));
+        break;
+      default:
+        break;
+    }
+    // Set the checksum
+    m_pMsgVCU1->data[7] = 
+      (uint8_t)(m_pMsgVCU1->data[0] + m_pMsgVCU1->data[1]
+      + m_pMsgVCU1->data[2] + m_pMsgVCU1->data[3]
+      + m_pMsgVCU1->data[4] + m_pMsgVCU1->data[5]
+      + m_pMsgVCU1->data[6]) ^ 0xFF;
   }
-  // Set the checksum
-  m_pMsgVCU1->data[7] = 
-    (m_pMsgVCU1->data[0] + m_pMsgVCU1->data[1]
-     + m_pMsgVCU1->data[2] + m_pMsgVCU1->data[3]
-     + m_pMsgVCU1->data[4] + m_pMsgVCU1->data[5]
-     + m_pMsgVCU1->data[6]) ^ 0xFF;
 }
 
 
@@ -121,10 +136,10 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
     case 0x105:
       // MCU1 with checksum
       if (pMsg->data[7] ==
-          (pMsg->data[0] + pMsg->data[1]
-           + pMsg->data[2] + pMsg->data[3]
-           + pMsg->data[4] + pMsg->data[5]
-           + pMsg->data[6]) ^ 0xFF) {
+          (uint8_t)(pMsg->data[0] + pMsg->data[1]
+          + pMsg->data[2] + pMsg->data[3]
+          + pMsg->data[4] + pMsg->data[5]
+          + pMsg->data[6]) ^ 0xFF) {
         float speed = (pMsg->data[0]*256 + pMsg->data[1]) * 0.25;
         this->setDoubleValue(&motorSpeed, speed);
         this->setDoubleValue(&motorTorque, pMsg->data[2] * 0.392);
@@ -138,42 +153,41 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
     case 0x106:
       // MCU2 with checksum
       if (pMsg->data[7] ==
-          (pMsg->data[0] + pMsg->data[1]
-           + pMsg->data[2] + pMsg->data[3]
-           + pMsg->data[4] + pMsg->data[5]
-           + pMsg->data[6]) ^ 0xFF) {
+          (uint8_t)(pMsg->data[0] + pMsg->data[1]
+          + pMsg->data[2] + pMsg->data[3]
+          + pMsg->data[4] + pMsg->data[5]
+          + pMsg->data[6]) ^ 0xFF) {
         this->setIntegerValue(&motorBodyTemp, pMsg->data[0] - 40);
         this->setIntegerValue(&motorControllerTemp, pMsg->data[1] - 40);
-        this->setBooleanValue(&motorDCOverCurrentFault, getBit(pMsg->data[2], 16));
-        this->setBooleanValue(&motorPhaseCurrentFault, getBit(pMsg->data[2], 17));
-        this->setBooleanValue(&motorOverTempFault, getBit(pMsg->data[2], 18));
-        this->setBooleanValue(&motorRotationTransformFault, getBit(pMsg->data[2], 19));
-        this->setBooleanValue(&motorPhaseCurrentSensorFault, getBit(pMsg->data[2], 20));
-        this->setBooleanValue(&motorOverSpeedFault, getBit(pMsg->data[2], 21));
-        this->setBooleanValue(&motorBodyOverTempFault, getBit(pMsg->data[2], 22));
-        this->setBooleanValue(&motorDCOverVoltageFault, getBit(pMsg->data[2], 23));
-        this->setBooleanValue(&motorBodyUnderTempFault, getBit(pMsg->data[3], 25));
-        this->setBooleanValue(&motorSystemFault, getBit(pMsg->data[3], 26));
-        this->setBooleanValue(&motorTempSensorFault, getBit(pMsg->data[3], 27));
-        this->setBooleanValue(&motorBodyTempSensorFault, getBit(pMsg->data[3], 28));
-        this->setBooleanValue(&motorDCVoltageSensorFault, getBit(pMsg->data[3], 29));
-        this->setBooleanValue(&motorDCUnderVoltageWarning, getBit(pMsg->data[3], 30));
-        this->setBooleanValue(&motorLVUnderVoltageWarning, getBit(pMsg->data[3], 31));
+        this->setBooleanValue(&motorDCOverCurrentFault, getBit(&(pMsg->data[2]), 16));
+        this->setBooleanValue(&motorPhaseCurrentFault, getBit(&(pMsg->data[2]), 17));
+        this->setBooleanValue(&motorOverTempFault, getBit(&(pMsg->data[2]), 18));
+        this->setBooleanValue(&motorRotationTransformFault, getBit(&(pMsg->data[2]), 19));
+        this->setBooleanValue(&motorPhaseCurrentSensorFault, getBit(&(pMsg->data[2]), 20));
+        this->setBooleanValue(&motorOverSpeedFault, getBit(&(pMsg->data[2]), 21));
+        this->setBooleanValue(&motorBodyOverTempFault, getBit(&(pMsg->data[2]), 22));
+        this->setBooleanValue(&motorDCOverVoltageFault, getBit(&(pMsg->data[2]), 23));
+        this->setBooleanValue(&motorBodyUnderTempFault, getBit(&(pMsg->data[3]), 25));
+        this->setBooleanValue(&motorSystemFault, getBit(&(pMsg->data[3]), 26));
+        this->setBooleanValue(&motorTempSensorFault, getBit(&(pMsg->data[3]), 27));
+        this->setBooleanValue(&motorBodyTempSensorFault, getBit(&(pMsg->data[3]), 28));
+        this->setBooleanValue(&motorDCVoltageSensorFault, getBit(&(pMsg->data[3]), 29));
+        this->setBooleanValue(&motorDCUnderVoltageWarning, getBit(&(pMsg->data[3]), 30));
+        this->setBooleanValue(&motorLVUnderVoltageWarning, getBit(&(pMsg->data[3]), 31));
         this->setIntegerValue(&motorWarningLevel, (pMsg->data[5] & 0b00001100) >> 2);
-        this->setBooleanValue(&motorOpenPhaseFault, getBit(pMsg->data[6], 54));
-        this->setBooleanValue(&motorStall, getBit(pMsg->data[6], 55));
+        this->setBooleanValue(&motorOpenPhaseFault, getBit(&(pMsg->data[6]), 54));
+        this->setBooleanValue(&motorStall, getBit(&(pMsg->data[6]), 55));
       }
       break;
     case 0x107:
       // MCU3
-      float voltage = (pMsg->data[0]*256 + pMsg->data[1]) * 0.01;
-      this->setDoubleValue(&motorDCVoltage, voltage);
-      float current = (pMsg->data[2]*256 + pMsg->data[3]) * 0.01;
-      this->setDoubleValue(&motorDCCurrent, current);
-      float phaseCurr = (pMsg->data[4]*256 + pMsg->data[5]) * 0.01;
-      this->setDoubleValue(&motorPhaseCurrent, phaseCurr);
+      this->setDoubleValue(&motorDCVoltage, (pMsg->data[0]*256 + pMsg->data[1]) * 0.01);
+      this->setDoubleValue(&motorDCCurrent, (pMsg->data[2]*256 + pMsg->data[3]) * 0.01);
+      this->setDoubleValue(&motorPhaseCurrent, (pMsg->data[4]*256 + pMsg->data[5]) * 0.01);
       break;
     default:
+      // Print the message ID
+      PRINT("Unknown message received: 0x" + String(pMsg->identifier, HEX))
       break;
   }
 }
@@ -188,6 +202,8 @@ void CANManager::onRemoteFrameRcv(twai_message_t* pMsg)
   // Switch through known message IDs
   switch (pMsg->identifier) {
     default:
+      // Print the message ID
+      PRINT("Unknown remote frame received: 0x" + String(pMsg->identifier, HEX))
       break;
   }
 }
@@ -214,6 +230,7 @@ void CANManager::setBits(uint8_t* pByte, uint8_t lsb, uint8_t len, uint8_t val)
 /** Helper function to get one bit from a byte.
  * @param pByte:  pointer to the byte to read
  * @param bitNum: bit position
+ * @return bool bit value
  */
 bool CANManager::getBit(uint8_t* pByte, uint8_t bitNum)
 {

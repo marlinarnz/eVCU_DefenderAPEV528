@@ -8,7 +8,7 @@ VehicleController vc;
 ParameterDouble throttlePosition(101);             // 0-100%
 ParameterBool   authenticationValid(104);
 ParameterBool   vehicleReady(105);
-ParameterDouble breakPositionMCU(106);
+ParameterDouble brakePositionMCU(106);
 ParameterBool   mainRelayConnected(107);
 ParameterInt    gearLeverPosition(108);            // Default, R, N, D, P
 ParameterInt    vcuMotorOperationMode(112);        // Standby, Drive, Regen
@@ -17,6 +17,8 @@ ParameterInt    keyPosition(114);                  // off, acc, on, crank
 ParameterBool   auxiliaryRelayConnected(115);
 // Other VCU Parameters
 ParameterBool   switchRecuOn(120);
+ParameterBool   mainRelayFault(121);
+ParameterBool   auxRelayFault(122);
 // The MCU's Parameters
 // Message ID 0x107
 ParameterDouble motorDCVoltage(201);

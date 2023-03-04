@@ -13,6 +13,8 @@ void Vehicle::begin()
   this->registerForValueChanged(104);
   this->registerForValueChanged(113);
   this->registerForValueChanged(114);
+  this->registerForValueChanged(121);
+  this->registerForValueChanged(122);
   this->registerForValueChanged(204);
   this->registerForValueChanged(205);
   this->registerForValueChanged(206);
@@ -46,6 +48,8 @@ void Vehicle::shutdown()
   this->unregisterForValueChanged(104);
   this->unregisterForValueChanged(113);
   this->unregisterForValueChanged(114);
+  this->unregisterForValueChanged(121);
+  this->unregisterForValueChanged(122);
   this->unregisterForValueChanged(204);
   this->unregisterForValueChanged(205);
   this->unregisterForValueChanged(206);
@@ -82,6 +86,12 @@ void Vehicle::onValueChanged(Parameter* pParamWithNewValue)
         break;
       case 114:
         updateVehicleReadiness();
+        break;
+      case 121:
+        updateWarningLevel();
+        break;
+      case 122:
+        updateWarningLevel();
         break;
       case 204:
         updateWarningLevel();
@@ -194,11 +204,13 @@ void Vehicle::updateWarningLevel()
            || motorControllerTemp.getVal() > DERATE_MOTOR_OVERTEMP_C
            || motorBodyOverTempFault.getVal()
            || motorWarningLevel.getVal() == 2
+           || auxRelayFault.getVal()
           ) // Conditions for warning level "Derating"
   { this->setIntegerValue(&vehicleWarningLevel, 2); }
   else if (motorDCOverCurrentFault.getVal()
            || motorOverTempFault.getVal()
            || motorWarningLevel.getVal() == 3
+           || mainRelayFault.getVal()
           ) // Conditions for warning level "Emergency stop"
   { this->setIntegerValue(&vehicleWarningLevel, 3); }
   else // All good

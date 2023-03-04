@@ -92,7 +92,7 @@ void CANManager::onValueChanged(Parameter* pParam)
         setBits(&(m_pMsgVCU1->data[4]), 32%8, 1, (uint8_t)(vehicleReady.getVal()));
         break;
       case 106:
-        setBits(&(m_pMsgVCU1->data[4]), 33%8, 2, (uint8_t)(breakPositionMCU.getVal()));
+        setBits(&(m_pMsgVCU1->data[4]), 33%8, 2, (uint8_t)(brakePositionMCU.getVal()));
         break;
       case 107:
         setBits(&(m_pMsgVCU1->data[4]), 35%8, 1, (uint8_t)(mainRelayConnected.getVal()));

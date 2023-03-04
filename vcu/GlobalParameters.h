@@ -16,7 +16,7 @@ extern VehicleController vc;
 extern ParameterDouble throttlePosition;               // 0-100%
 extern ParameterBool   authenticationValid;
 extern ParameterBool   vehicleReady;
-extern ParameterDouble breakPositionMCU;
+extern ParameterDouble brakePositionMCU;
 extern ParameterBool   mainRelayConnected;
 extern ParameterInt    gearLeverPosition;              // Default, R, N, D, P
 extern ParameterInt    vcuMotorOperationMode;          // Standby, Drive, Regen
@@ -25,6 +25,8 @@ extern ParameterInt    keyPosition;                    // off, acc, on, crank
 extern ParameterBool   auxiliaryRelayConnected;
 // Other VCU Parameters
 extern ParameterBool   switchRecuOn;
+extern ParameterBool   mainRelayFault;
+extern ParameterBool   auxRelayFault;
 // The MCU's Parameters
 // Message ID 0x107
 extern ParameterDouble motorDCVoltage;
@@ -68,6 +70,7 @@ extern ParameterInt    motor105RollingCounter;
 #define DERATE_MOTOR_OVERTEMP_C 70
 #define WARN_BATTERY_UNDERVOLTAGE_V 340
 #define DERATE_BATTERY_UNDERVOLTAGE_V 330
+#define BRAKE_THRESHOLD_PERCENT 0.1f
 
 
 #endif

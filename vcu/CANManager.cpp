@@ -51,7 +51,7 @@ void CANManager::begin()
   this->registerForValueChanged(115);
   
   // Define message(s) to send
-  this->setTransactionPeriodic(m_pMsgVCU1, 10);
+  //this->setTransactionPeriodic(m_pMsgVCU1, 10);
 }
 
 

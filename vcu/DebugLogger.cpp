@@ -7,17 +7,20 @@
 void DebugLogger::begin()
 {
   // Start the threads
-  this->startTasks(4000);
+  this->startTasks(16000);
 
   // Register for parameter changes
+  this->registerForValueChanged(101);
   this->registerForValueChanged(104);
   this->registerForValueChanged(105);
+  this->registerForValueChanged(106);
   this->registerForValueChanged(107);
   this->registerForValueChanged(108);
   this->registerForValueChanged(112);
   this->registerForValueChanged(113);
   this->registerForValueChanged(114);
   this->registerForValueChanged(115);
+  this->registerForValueChanged(120);
   this->registerForValueChanged(201);
   this->registerForValueChanged(204);
   this->registerForValueChanged(205);
@@ -34,14 +37,17 @@ void DebugLogger::begin()
  */
 void DebugLogger::shutdown()
 {
+  this->unregisterForValueChanged(101);
   this->unregisterForValueChanged(104);
   this->unregisterForValueChanged(105);
+  this->unregisterForValueChanged(106);
   this->unregisterForValueChanged(107);
   this->unregisterForValueChanged(108);
   this->unregisterForValueChanged(112);
   this->unregisterForValueChanged(113);
   this->unregisterForValueChanged(114);
   this->unregisterForValueChanged(115);
+  this->unregisterForValueChanged(120);
   this->unregisterForValueChanged(201);
   this->unregisterForValueChanged(204);
   this->unregisterForValueChanged(205);
@@ -60,11 +66,27 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
 {
   if(pParamWithNewValue) {
     switch(pParamWithNewValue->getId()) {
+      case 101:
+        if (throttlePosition.getVal() > 0.05) {
+          PRINT("Throttle pressed")
+        }
+        else if (throttlePosition.getVal() == 0) {
+          PRINT("Throttle released")
+        }
+        break;
       case 104:
         PRINT("Vehicle authentication: " + String(authenticationValid.getVal()))
         break;
       case 105:
         PRINT("Vehicle readiness: " + String(vehicleReady.getVal()))
+        break;
+      case 106:
+        if (brakePositionMCU.getVal() > 0.05) {
+          PRINT("Brake pressed")
+        }
+        else if (brakePositionMCU.getVal() == 0) {
+          PRINT("Brake released")
+        }
         break;
       case 107:
         PRINT("Main contactor closed: " + String(mainRelayConnected.getVal()))
@@ -83,6 +105,9 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
         break;
       case 115:
         PRINT("Aux. contactor closed: " + String(auxiliaryRelayConnected.getVal()))
+        break;
+      case 120:
+        PRINT("Regenerative breaking active: " + String(switchRecuOn.getVal()))
         break;
       case 201:
         PRINT("Pack voltage at MCU: " + String(motorDCVoltage.getVal()))

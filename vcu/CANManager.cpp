@@ -3,9 +3,12 @@
 
 /** Constructor
  *  Instantiates all known CAN bus messages.
+ *  @param vc pointer to the VehicleController instance
+ *  @param pinRx RX capable GPIO pin for CAN bus communication
+ *  @param pinRx TX capable GPIO pin for CAN bus communication
  */
-CANManager::CANManager(VehicleController* vc)
-  : DeviceCAN(vc), m_pMsgVCU1(NULL)
+CANManager::CANManager(VehicleController* vc, uint8_t pinRx, uint8_t pinTx)
+  : DeviceCAN(vc), m_pMsgVCU1(NULL), m_pinRx(pinRx), m_pinTx(pinTx)
 {
   // Instantiate messages
   m_pMsgVCU1 = new twai_message_t;
@@ -29,13 +32,16 @@ CANManager::~CANManager()
 
 /** Start operation.
  *  Start threads, install CAN driver, set outgoing messages
+ *  @param speed CAN bus bps `{125000, 250000, 500000, 1000000}`
  */
-void CANManager::begin()
+void CANManager::begin(uint32_t speed)
 {
   // Start the threads and install the driver
   this->startTasks(8000, 8000);
   configCAN_t config;
-  config.speed = 500000;
+  config.speed = speed;
+  config.txPin = static_cast<gpio_num_t>(m_pinTx);
+  config.rxPin = static_cast<gpio_num_t>(m_pinRx);
   this->initSerialProtocol(config);
 
   // Register for parameter changes
@@ -52,6 +58,13 @@ void CANManager::begin()
   
   // Define message(s) to send
   //this->setTransactionPeriodic(m_pMsgVCU1, 10);
+}
+/** Start operation.
+ *  Start threads, install CAN driver, set outgoing messages
+ */
+void CANManager::begin()
+{
+  CANManager::begin(500000);
 }
 
 

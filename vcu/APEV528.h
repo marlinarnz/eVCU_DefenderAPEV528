@@ -13,7 +13,7 @@
 class APEV528 : public Device
 {
 public:
-  APEV528(VehicleController* vc) : Device(vc), m_waitingForContactor(false) {};
+  APEV528(VehicleController* vc, uint8_t enablePin);
   ~APEV528() {};
   void begin();
   void shutdown();
@@ -23,6 +23,7 @@ private:
   void setMotorRunning();
   void setMotorRegen();
   bool m_waitingForContactor;
+  uint8_t m_enablePin;
 };
 
 #endif

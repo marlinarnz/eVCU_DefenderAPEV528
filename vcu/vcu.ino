@@ -24,7 +24,7 @@
 DebugLogger     logger(&vc);
 CANManager      can(&vc, 22, 21);
 Vehicle         vehicle(&vc);
-APEV528         motor(&vc);
+APEV528         motor(&vc, 14);
 uint8_t ignitionPins[3] = {13, 35, 34};
 int ignitionModes[3] = {INPUT_PULLDOWN, INPUT, INPUT};
 IgnitionSwitch  ignition(&vc, ignitionPins, ignitionModes, &keyPosition, 50);
@@ -49,16 +49,16 @@ void setup() {
   
   // Start the devices in reasonable order
   logger.begin();
-  can.begin(500000);
+  can.begin(500000);      // Should start first to get all starting values
   throttle.begin();
   brake.begin();
   motor.begin();
   contactors.begin();
-  vehicle.begin();
+  vehicle.begin();        // Sets vehicle authentication to true
   recuSwitch.begin();
-  ignition.begin();       // Should start at last to notify everone
+  ignition.begin();       // Should start at last to notify everyone
 
-  vTaskDelete(NULL); // exit
+  vTaskDelete(NULL); // exit this task
 }
 
 

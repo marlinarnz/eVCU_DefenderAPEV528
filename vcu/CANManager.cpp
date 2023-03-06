@@ -12,6 +12,12 @@ CANManager::CANManager(VehicleController* vc, uint8_t pinRx, uint8_t pinTx)
 {
   // Instantiate messages
   m_pMsgVCU1 = new twai_message_t;
+  m_pMsgVCU1->extd = 0;
+  m_pMsgVCU1->rtr = 0;
+  m_pMsgVCU1->ss = 0;
+  m_pMsgVCU1->self = 0;
+  m_pMsgVCU1->dlc_non_comp = 0;
+  m_pMsgVCU1->reserved = 0;
   m_pMsgVCU1->data_length_code = 8;
   m_pMsgVCU1->identifier = 0x101;
   for (int i=0; i<7; i++) {
@@ -57,7 +63,7 @@ void CANManager::begin(uint32_t speed)
   this->registerForValueChanged(115);
   
   // Define message(s) to send
-  //this->setTransactionPeriodic(m_pMsgVCU1, 10);
+  this->setTransactionPeriodic(m_pMsgVCU1, 10);
 }
 /** Start operation.
  *  Start threads, install CAN driver, set outgoing messages

@@ -36,8 +36,9 @@ void Vehicle::begin()
   this->registerForValueChanged(222);
 
   // Initialise vehicle Parameters
-  this->setIntegerValue(&vehicleWarningLevel, 0);
   this->setBooleanValue(&authenticationValid, true);
+  updateWarningLevel();
+  updateVehicleReadiness();
 }
 
 

@@ -1,6 +1,16 @@
 #include "APEV528.h"
 
 
+/** Constructor.
+ */
+APEV528::APEV528(VehicleController* vc, uint8_t enablePin)
+    : Device(vc), m_waitingForContactor(false), m_enablePin(enablePin)
+{
+  // Set the MCU relay pin
+  pinMode(enablePin, OUTPUT);
+}
+
+
 /** Start operation.
  *  Start threads, subscribe Parameters, set outgoing messages
  */
@@ -23,6 +33,9 @@ void APEV528::begin()
 
   // Initialise MCU Parameters
   this->setIntegerValue(&vcuMotorOperationMode, 0);
+
+  // Start the MCU
+  digitalWrite(m_enablePin, LOW);   // Set LOW to enable relay
 }
 
 
@@ -30,6 +43,7 @@ void APEV528::begin()
  */
 void APEV528::shutdown()
 {
+  digitalWrite(m_enablePin, HIGH);
   this->unregisterForValueChanged(104);
   this->unregisterForValueChanged(105);
   this->unregisterForValueChanged(114);

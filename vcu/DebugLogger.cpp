@@ -7,7 +7,7 @@
 void DebugLogger::begin()
 {
   // Start the threads
-  this->startTasks(16000);
+  this->startTasks(24000);
 
   // Register for parameter changes
   this->registerForValueChanged(101);
@@ -67,11 +67,13 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
   if(pParamWithNewValue) {
     switch(pParamWithNewValue->getId()) {
       case 101:
-        if (throttlePosition.getVal() > 0.05) {
+        if (throttlePosition.getVal() > 0.2 && !m_throttleStatePressed) {
           PRINT("Throttle pressed")
+          m_throttleStatePressed = true;
         }
-        else if (throttlePosition.getVal() == 0) {
+        else if (throttlePosition.getVal() == 0 && m_throttleStatePressed) {
           PRINT("Throttle released")
+          m_throttleStatePressed = false;
         }
         break;
       case 104:
@@ -81,11 +83,13 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
         PRINT("Vehicle readiness: " + String(vehicleReady.getVal()))
         break;
       case 106:
-        if (brakePositionMCU.getVal() > 0.05) {
+        if (brakePositionMCU.getVal() > 0.2 && !m_brakeStatePressed) {
           PRINT("Brake pressed")
+          m_brakeStatePressed = true;
         }
-        else if (brakePositionMCU.getVal() == 0) {
+        else if (brakePositionMCU.getVal() == 0 && m_brakeStatePressed) {
           PRINT("Brake released")
+          m_brakeStatePressed = false;
         }
         break;
       case 107:

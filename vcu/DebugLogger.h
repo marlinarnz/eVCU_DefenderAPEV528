@@ -12,13 +12,15 @@
 class DebugLogger : public Device
 {
 public:
-  DebugLogger(VehicleController* vc) : Device(vc) {};
+  DebugLogger(VehicleController* vc) : Device(vc), m_throttleStatePressed(false), m_brakeStatePressed(false) {};
   ~DebugLogger() {};
   void begin();
   void shutdown();
 
 private:
   void onValueChanged(Parameter* pParam);
+  bool m_throttleStatePressed;
+  bool m_brakeStatePressed;
 };
 
 #endif

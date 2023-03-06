@@ -3,9 +3,10 @@
  * and inverter and Tesla Battery packs with Mitsubishi Outlander OBC+DCDC
 */
 
+
 // General tools (use a lot of program storage space)
-#include "esp_wifi.h"
-#include "esp_bt.h"
+//#include "esp_wifi.h"
+//#include "esp_bt.h"
 // Custom devices
 #include "GlobalParameters.h"
 #include "DebugLogger.h"
@@ -21,7 +22,7 @@
 
 // Instantiate Devices
 DebugLogger     logger(&vc);
-CANManager      can(&vc);
+CANManager      can(&vc, 22, 21);
 Vehicle         vehicle(&vc);
 APEV528         motor(&vc);
 uint8_t ignitionPins[3] = {13, 35, 34};
@@ -37,28 +38,27 @@ void setup() {
   // Preparations
   // Start the Serial monitor
   Serial.begin(115200);
-  // Disable WiFi
+  vTaskDelay(100);
+  /*// Disable WiFi
   esp_wifi_stop();
   esp_wifi_deinit();
   // Disable Bluetooth
   esp_bt_controller_disable();
   esp_bt_controller_deinit();
-  esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
+  esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);*/
   
   // Start the devices in reasonable order
   logger.begin();
-  can.begin();
+  can.begin(500000);
   throttle.begin();
   brake.begin();
   motor.begin();
-  vehicle.begin();
   contactors.begin();
+  vehicle.begin();
   recuSwitch.begin();
   ignition.begin();       // Should start at last to notify everone
 
-  while(1) {
-    vTaskDelay(100); // Run indefinitely
-  }
+  vTaskDelete(NULL); // exit
 }
 
 

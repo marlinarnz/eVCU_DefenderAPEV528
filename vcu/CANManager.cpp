@@ -238,11 +238,13 @@ void CANManager::onRemoteFrameRcv(twai_message_t* pMsg)
  */
 void CANManager::setBits(uint8_t* pByte, uint8_t lsb, uint8_t len, uint8_t val)
 {
-  for (uint8_t pos=0; pos<len; pos++) {
-    uint8_t one = 1;
-    uint8_t valBit = ((val >> lsb+len-1-pos) & one) << lsb+len-pos;
-    *pByte ^= (-valBit ^ *pByte) & (one << (lsb + pos));
-  }
+  // create a mask with the given length and lsb position
+  uint8_t one = 1;
+  uint8_t mask = ((one << len) - one) << lsb;
+  // clear the bits within the mask from the target byte
+  *pByte &= ~mask;
+  // set the bits in the target byte based on the given value
+  *pByte |= (val << lsb) & mask;
 }
 
 

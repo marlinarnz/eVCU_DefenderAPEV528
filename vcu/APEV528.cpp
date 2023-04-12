@@ -151,7 +151,7 @@ void APEV528::onValueChanged(Parameter* pParamWithNewValue)
 
 /** Set the motor to run, if reasonable.
  *  Based on vehicle readiness, VCU and MCU warning levels below 3,
- *  and stall status. Stars only if main contactor is closed.
+ *  BMS status, and stall status. Starts only if main contactor is closed.
  *  Otherwise, sets the waiting status and starts when it is closed.
  */
 void APEV528::setMotorRunning()
@@ -159,7 +159,8 @@ void APEV528::setMotorRunning()
   if (vehicleReady.getVal()
       && vehicleWarningLevel.getVal() < 3
       && motorWarningLevel.getVal() < 3
-      && !motorStall.getVal())
+      && !motorStall.getVal()
+      && !batteryDischargeInhibit.getVal())
   {
     if (mainRelayConnected.getVal()) {
       this->setIntegerValue(&vcuMotorOperationMode, 1);
@@ -177,7 +178,8 @@ void APEV528::setMotorRunning()
 void APEV528::setMotorRegen()
 {
   if (vcuMotorOperationMode.getVal() == 1
-      && switchRecuOn.getVal())
+      && switchRecuOn.getVal()
+      && !batteryChargeInhibit.getVal())
   {
     this->setIntegerValue(&vcuMotorOperationMode, 2);
   }

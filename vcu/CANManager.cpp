@@ -204,6 +204,26 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
       this->setDoubleValue(&motorDCCurrent, (pMsg->data[2]*256 + pMsg->data[3]) * 0.01);
       this->setDoubleValue(&motorPhaseCurrent, (pMsg->data[4]*256 + pMsg->data[5]) * 0.01);
       break;
+    case 0x103:
+      // BMS1
+      this->setDoubleValue(&batteryPackVoltage, (pMsg->data[0]*256 + pMsg->data[1]) * 0.1);
+      this->setIntegerValue(&batteryAverageTemp, pMsg->data[2] - 40);
+      this->setIntegerValue(&batteryHighestTemp, pMsg->data[3] - 40);
+      this->setIntegerValue(&batteryLowestTemp, pMsg->data[4] - 40);
+      this->setDoubleValue(&batteryLVVoltage, pMsg->data[5] * 0.1);
+      this->setIntegerValue(&batteryState, pMsg->data[6] >> 4);
+      this->setBooleanValue(&batteryIsFaulted, getBit(&(pMsg->data[6]), 4));
+      this->setBooleanValue(&batteryIsStickyFaulted, getBit(&(pMsg->data[6]), 5));
+      this->setBooleanValue(&batteryChargeInhibit, getBit(&(pMsg->data[6]), 6));
+      this->setBooleanValue(&batteryDischargeInhibit, getBit(&(pMsg->data[6]), 7));
+      this->setBooleanValue(&batteryPackCommFault, getBit(&(pMsg->data[7]), 0));
+      this->setBooleanValue(&batteryOverVoltageFault, getBit(&(pMsg->data[7]), 1));
+      this->setBooleanValue(&batteryUnderVoltageFault, getBit(&(pMsg->data[7]), 2));
+      this->setBooleanValue(&batteryOverTempFault, getBit(&(pMsg->data[7]), 3));
+      this->setBooleanValue(&batteryUnderTempFault, getBit(&(pMsg->data[7]), 4));
+      this->setBooleanValue(&batteryLVVoltageFault, getBit(&(pMsg->data[7]), 5));
+      this->setBooleanValue(&batteryWaterFault, getBit(&(pMsg->data[7]), 6));
+      this->setBooleanValue(&batteryHeatLoopFault, getBit(&(pMsg->data[7]), 7));
     default:
       // Print the message ID
       PRINT("Unknown message received: 0x" + String(pMsg->identifier, HEX))

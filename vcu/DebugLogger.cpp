@@ -30,6 +30,13 @@ void DebugLogger::begin()
   this->registerForValueChanged(229);
   this->registerForValueChanged(230);
   this->registerForValueChanged(231);
+  this->registerForValueChanged(302);
+  this->registerForValueChanged(303);
+  this->registerForValueChanged(304);
+  this->registerForValueChanged(306);
+  this->registerForValueChanged(308);
+  this->registerForValueChanged(309);
+  this->registerForValueChanged(310);
 }
 
 
@@ -57,6 +64,13 @@ void DebugLogger::shutdown()
   this->unregisterForValueChanged(229);
   this->unregisterForValueChanged(230);
   this->unregisterForValueChanged(231);
+  this->unregisterForValueChanged(302);
+  this->unregisterForValueChanged(303);
+  this->unregisterForValueChanged(304);
+  this->unregisterForValueChanged(306);
+  this->unregisterForValueChanged(308);
+  this->unregisterForValueChanged(309);
+  this->unregisterForValueChanged(310);
 }
 
 
@@ -139,6 +153,27 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
         break;
       case 231:
         PRINT("Motor operation mode (0-2: standby, torque, speed): " + String(motorMode.getVal()))
+        break;
+      case 302:
+        PRINT("BMS avg. temperature: " + String(batteryAverageTemp.getVal()))
+        break;
+      case 303:
+        PRINT("BMS max. temperature: " + String(batteryHighestTemp.getVal()))
+        break;
+      case 304:
+        PRINT("BMS min. temperature: " + String(batteryLowestTemp.getVal()))
+        break;
+      case 306:
+        PRINT("BMS state (0-5: INIT, STANDBY, PRE_CHARGE, CHARGING, POST_CHARGE, RUN): " + String(batteryState.getVal()))
+        break;
+      case 308:
+        PRINT("BMS is faulted: " + String(batteryIsStickyFaulted.getVal()))
+        break;
+      case 309:
+        PRINT("BMS charge inhibit: " + String(batteryChargeInhibit.getVal()))
+        break;
+      case 310:
+        PRINT("BMS discharge inhibit: " + String(batteryDischargeInhibit.getVal()))
         break;
       default:
         break;

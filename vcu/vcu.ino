@@ -30,8 +30,8 @@ int ignitionModes[3] = {INPUT_PULLDOWN, INPUT, INPUT};
 IgnitionSwitch  ignition(&vc, ignitionPins, ignitionModes, &keyPosition, 50);
 Contactors      contactors(&vc, 27, 26, 1000, &mainRelayConnected, &auxiliaryRelayConnected, &keyPosition, &vehicleReady);
 Switch          recuSwitch(&vc, 25, INPUT, &switchRecuOn, 50);
-Pedal           throttle(&vc, 32, 10, &throttlePosition);
-Pedal           brake(&vc, 33, 10, &brakePositionMCU);
+//Pedal           throttle(&vc, 32, 10, &throttlePosition); // TODO: include discharge inhibit and BMS state = RUN (concatenate both BMS parameters to one ParameterBool ThrottleInhibit)
+//Pedal           brake(&vc, 33, 10, &brakePositionMCU); // TODO: include charge inhibit and BMS state = RUN
 
 
 void setup() {
@@ -50,8 +50,8 @@ void setup() {
   // Start the devices in reasonable order
   logger.begin();
   can.begin(500000);      // Should start first to get all starting values
-  throttle.begin();
-  brake.begin();
+  //throttle.begin();
+  //brake.begin();
   motor.begin();
   contactors.begin();
   vehicle.begin();        // Sets vehicle authentication to true

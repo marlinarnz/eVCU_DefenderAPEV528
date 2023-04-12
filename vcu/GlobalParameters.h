@@ -27,6 +27,7 @@ extern ParameterBool   auxiliaryRelayConnected;
 extern ParameterBool   switchRecuOn;
 extern ParameterBool   mainRelayFault;
 extern ParameterBool   auxRelayFault;
+
 // The MCU's Parameters
 // Message ID 0x107
 extern ParameterDouble motorDCVoltage;
@@ -63,6 +64,27 @@ extern ParameterInt    motorDirection;
 extern ParameterInt    motorState;
 extern ParameterInt    motorMode;
 extern ParameterInt    motor105RollingCounter;
+
+// BMS Parameters
+// Message ID 0x103
+extern ParameterDouble batteryPackVoltage;
+extern ParameterInt    batteryAverageTemp;
+extern ParameterInt    batteryHighestTemp;
+extern ParameterInt    batteryLowestTemp;
+extern ParameterDouble batteryLVVoltage;
+extern ParameterInt    batteryState;                   // 0-5: INIT, STANDBY, PRE_CHARGE, CHARGING, POST_CHARGE, RUN
+extern ParameterBool   batteryIsFaulted;
+extern ParameterBool   batteryIsStickyFaulted;
+extern ParameterBool   batteryChargeInhibit;
+extern ParameterBool   batteryDischargeInhibit;
+extern ParameterBool   batteryPackCommFault;
+extern ParameterBool   batteryOverVoltageFault;
+extern ParameterBool   batteryUnderVoltageFault;
+extern ParameterBool   batteryOverTempFault;
+extern ParameterBool   batteryUnderTempFault;
+extern ParameterBool   batteryLVVoltageFault;
+extern ParameterBool   batteryWaterFault;
+extern ParameterBool   batteryHeatLoopFault;
 
 
 // Define thresholds

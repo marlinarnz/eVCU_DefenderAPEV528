@@ -19,6 +19,7 @@ ParameterBool   auxiliaryRelayConnected(115);
 ParameterBool   switchRecuOn(120);
 ParameterBool   mainRelayFault(121);
 ParameterBool   auxRelayFault(122);
+
 // The MCU's Parameters
 // Message ID 0x107
 ParameterDouble motorDCVoltage(201);
@@ -55,3 +56,24 @@ ParameterInt    motorDirection(229);
 ParameterInt    motorState(230);
 ParameterInt    motorMode(231);
 ParameterInt    motor105RollingCounter(232);
+
+// BMS Parameters
+// Message ID 0x103
+ParameterDouble batteryPackVoltage(301);
+ParameterInt    batteryAverageTemp(302);
+ParameterInt    batteryHighestTemp(303);
+ParameterInt    batteryLowestTemp(304);
+ParameterDouble batteryLVVoltage(305);
+ParameterInt    batteryState(306);
+ParameterBool   batteryIsFaulted(307);
+ParameterBool   batteryIsStickyFaulted(308);
+ParameterBool   batteryChargeInhibit(309);
+ParameterBool   batteryDischargeInhibit(310);
+ParameterBool   batteryPackCommFault(311);
+ParameterBool   batteryOverVoltageFault(312);
+ParameterBool   batteryUnderVoltageFault(313);
+ParameterBool   batteryOverTempFault(314);
+ParameterBool   batteryUnderTempFault(315);
+ParameterBool   batteryLVVoltageFault(316);
+ParameterBool   batteryWaterFault(317);
+ParameterBool   batteryHeatLoopFault(318);

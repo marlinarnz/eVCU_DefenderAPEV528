@@ -224,6 +224,7 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
       this->setBooleanValue(&batteryLVVoltageFault, getBit(&(pMsg->data[7]), 5));
       this->setBooleanValue(&batteryWaterFault, getBit(&(pMsg->data[7]), 6));
       this->setBooleanValue(&batteryHeatLoopFault, getBit(&(pMsg->data[7]), 7));
+      break;
     default:
       // Print the message ID
       PRINT("Unknown message received: 0x" + String(pMsg->identifier, HEX))

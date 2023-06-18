@@ -58,6 +58,9 @@ void setup() {
   recuSwitch.begin();
   ignition.begin();       // Should start at last to notify everyone
 
+  while (1) {
+    vTaskDelay(pdMS_TO_TICKS(4));
+  }
   vTaskDelete(NULL); // exit this task
 }
 

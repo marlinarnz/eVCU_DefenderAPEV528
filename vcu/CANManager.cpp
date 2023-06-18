@@ -164,9 +164,9 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
         this->setDoubleValue(&motorTorque, pMsg->data[2] * 0.392);
         this->setDoubleValue(&motorMaxTorque, pMsg->data[3] * 0.392);
         this->setDoubleValue(&motorMaxNegativeTorque, pMsg->data[4] * 0.392);
-        this->setIntegerValue(&motorDirection, (pMsg->data[5] & 0b00000011));
-        this->setIntegerValue(&motorState, (pMsg->data[5] & 0b00011100) >> 2);
-        this->setIntegerValue(&motorMode, (pMsg->data[6] & 0b00000011));
+        this->setIntegerValue(&motorDirection, (pMsg->data[5] & 0b11000000) >> 6);
+        this->setIntegerValue(&motorState, (pMsg->data[5] & 0b00111000) >> 3);
+        this->setIntegerValue(&motorMode, (pMsg->data[6] & 0b00110000) >> 4);
       }
       break;
     case 0x106:
@@ -193,7 +193,7 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
         this->setBooleanValue(&motorDCVoltageSensorFault, getBit(&(pMsg->data[3]), 29));
         this->setBooleanValue(&motorDCUnderVoltageWarning, getBit(&(pMsg->data[3]), 30));
         this->setBooleanValue(&motorLVUnderVoltageWarning, getBit(&(pMsg->data[3]), 31));
-        this->setIntegerValue(&motorWarningLevel, (pMsg->data[5] & 0b00001100) >> 2);
+        this->setIntegerValue(&motorWarningLevel, (pMsg->data[6] & 0b00110000) >> 4);
         this->setBooleanValue(&motorOpenPhaseFault, getBit(&(pMsg->data[6]), 54));
         this->setBooleanValue(&motorStall, getBit(&(pMsg->data[6]), 55));
       }
@@ -270,11 +270,12 @@ void CANManager::setBits(uint8_t* pByte, uint8_t lsb, uint8_t len, uint8_t val)
 
 
 /** Helper function to get one bit from a byte.
+ * Motorola forward LSB byte order
  * @param pByte:  pointer to the byte to read
  * @param bitNum: bit position
  * @return bool bit value
  */
 bool CANManager::getBit(uint8_t* pByte, uint8_t bitNum)
 {
-  return (bool)((*pByte << bitNum%8) >> 7);
+  return (bool)( (*pByte << (8 - bitNum%8) ) >> 7);
 }

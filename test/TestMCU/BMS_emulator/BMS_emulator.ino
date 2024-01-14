@@ -18,10 +18,14 @@ struct can_frame msgOut2;
 long msg1Time = 0;
 long msg2Time = 0;
 int msg1Interval, msg2Interval;
+int msg1Counter, msg2Counter;
 
 // Interactive pins
-const int PIN_PP = 7;   // Proximity pilot
 const int PIN_IRQ = 2;
+
+// flags for connection of contactors
+bool mainConn = false;
+bool auxConn = false;
 
 // Interrupt handler
 bool flagIncoming = false;
@@ -45,7 +49,6 @@ void printMessage(uint32_t id, uint8_t len, uint8_t *frame) {
 
 void setup() {
 	// Set digital pins
-  pinMode(PIN_PP, INPUT_PULLUP);  // Proximity pilot
   pinMode(PIN_IRQ, INPUT_PULLUP); // Interrupt from MCP2515
 
   Serial.begin(115200);
@@ -62,24 +65,24 @@ void setup() {
 	Serial.println("Done.");
 
   // Init the outgoing messages
-  msg1Interval = 100;
-  msgOut1.can_id  = 0x285;
+  msg1Interval = 20;
+  msgOut1.can_id  = 0x1A0; // BMS
   msgOut1.can_dlc = 8;
-  msgOut2.data[0] = 0x00;
-  msgOut2.data[1] = 0x00;
-  msgOut2.data[2] = 0xb6; // pulls in EVSE
-  msgOut1.data[3] = 0x00;
-  msgOut1.data[4] = 0x00; // looks like a heartbeat signal incrementing every second
-  msgOut1.data[5] = 0x00;
-  msgOut1.data[6] = 0x00;
-  msgOut1.data[7] = 0x00;
+  msgOut1.data[0] = 0x00; // warning level, status, main contactors
+  msgOut1.data[1] = 0x00; // SOC
+  msgOut1.data[2] = 0x00; // SOH
+  msgOut1.data[3] = 0x00; // AC, precharge relays, mode
+  msgOut1.data[4] = 0x00; // max discharge (14 bits)
+  msgOut1.data[5] = 0x00; // max discharge continued, contactor adherence
+  msgOut1.data[6] = 0x00; // alarms and rolling counter
+  msgOut1.data[7] = 0x00; // checksum
 
-  msg2Interval = 100;
-  msgOut2.can_id  = 0x286;
+  msg2Interval = 50;
+  msgOut2.can_id  = 0x431; // park break
   msgOut2.can_dlc = 8;
-  msgOut1.data[0] = 0x0E;
-  msgOut1.data[1] = 0xD8; // 380V (Big Endian e.g. 0x0E 0x74 = 3700 = 370v)
-  msgOut1.data[2] = 0x32; // 5A (Amps times 10)
+  msgOut2.data[0] = 0x00; // park break
+  msgOut2.data[1] = 0x00;
+  msgOut2.data[2] = 0x00;
   msgOut2.data[3] = 0x00;
   msgOut2.data[4] = 0x00;
   msgOut2.data[5] = 0x00;
@@ -115,16 +118,48 @@ void loop() {
   MCP2515::ERROR err = CAN.readMessage(&msgIn);
   if (MCP2515::ERROR_OK == err) {
     printMessage(msgIn.can_id, msgIn.can_dlc, msgIn.data);
-  }
+    if (msgIn.can_id == 0x101) {
 
-  // Write messages
-  if (millis() - msg1Time > msg1Interval) {
-    CAN.sendMessage(&msgOut1);
-  }
+      // Check contactor status
+      if ((msgIn.data[4] >> 3) & 1 == 1) {
+        // main contactor connected
+        mainConn = true;
+      } else {
+        mainConn = false;
+      }
+      if ((msgIn.data[6] >> 4) & 1 == 1) {
+        // precharge contactor connected
+        auxConn = true;
+      } else {
+        auxConn = false;
+      }
 
-  if (digitalRead(PIN_PP) == LOW) {
-    if (millis() - msg2Time > msg2Interval) {
-      CAN.sendMessage(&msgOut2);
+      // Now set the precharge message accordingly
+      if (!mainConn && auxConn) {
+        msgOut1.data[3] = 0x00;
+      }
+      else if (mainConn && !auxConn) {
+        msgOut1.data[3] = 0x01 << 4;
+      }
+
+      // Reset precharge message when key position is acc
+      if ((msgIn.data[5] >> 6 ) & 0x3 < 2) {
+        msgOut1.data[3] = 0x00;
+      }
     }
+  }
+
+  // Write
+  if (millis() - msg1Time > msg1Interval) {
+    msg1Counter++;
+    msgOut1.data[6] = msgOut1.data[6] + 1;
+    if (msgOut1.data[6] > 0xf) {msgOut1.data[6] = 0;}
+    msgOut1.data[7] = (uint8_t)((msgOut1.data[0] + msgOut1.data[1] + msgOut1.data[2] + msgOut1.data[3] + msgOut1.data[4] + msgOut1.data[5] + msgOut1.data[6]) ^ 0xFF );
+    CAN.sendMessage(&msgOut1);
+    msg1Time = millis();
+  }
+  if (millis() - msg2Time > msg2Interval) {
+    CAN.sendMessage(&msgOut2);
+    msg2Time = millis();
   }
 }

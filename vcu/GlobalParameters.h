@@ -92,7 +92,7 @@ extern ParameterBool   batteryHeatLoopFault;
 #define DERATE_MOTOR_OVERTEMP_C 70
 #define WARN_BATTERY_UNDERVOLTAGE_V 340
 #define DERATE_BATTERY_UNDERVOLTAGE_V 330
-#define BRAKE_THRESHOLD_PERCENT 0.1f
+#define BRAKE_THRESHOLD_PERCENT 5
 
 
 #endif

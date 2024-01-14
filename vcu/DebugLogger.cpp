@@ -81,11 +81,11 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
   if(pParamWithNewValue) {
     switch(pParamWithNewValue->getId()) {
       case 101:
-        if (throttlePosition.getVal() > 0.2 && !m_throttleStatePressed) {
-          PRINT("Throttle pressed")
+        if (throttlePosition.getVal() > 50 && !m_throttleStatePressed) {
+          PRINT("Throttle pressed halve way")
           m_throttleStatePressed = true;
         }
-        else if (throttlePosition.getVal() == 0 && m_throttleStatePressed) {
+        else if (throttlePosition.getVal() < 30 && m_throttleStatePressed) {
           PRINT("Throttle released")
           m_throttleStatePressed = false;
         }
@@ -97,11 +97,11 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
         PRINT("Vehicle readiness: " + String(vehicleReady.getVal()))
         break;
       case 106:
-        if (brakePositionMCU.getVal() > 0.2 && !m_brakeStatePressed) {
+        if (brakePositionMCU.getVal() > BRAKE_THRESHOLD_PERCENT && !m_brakeStatePressed) {
           PRINT("Brake pressed")
           m_brakeStatePressed = true;
         }
-        else if (brakePositionMCU.getVal() == 0 && m_brakeStatePressed) {
+        else if (brakePositionMCU.getVal() < BRAKE_THRESHOLD_PERCENT && m_brakeStatePressed) {
           PRINT("Brake released")
           m_brakeStatePressed = false;
         }
@@ -128,7 +128,7 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
         PRINT("Regenerative breaking active: " + String(switchRecuOn.getVal()))
         break;
       case 201:
-        PRINT("Pack voltage at MCU: " + String(motorDCVoltage.getVal()))
+        //PRINT("Pack voltage at MCU: " + String(motorDCVoltage.getVal()))
         break;
       case 204:
         PRINT("Motor temperature: " + String(motorBodyTemp.getVal()))

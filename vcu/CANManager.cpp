@@ -8,7 +8,8 @@
  *  @param pinRx TX capable GPIO pin for CAN bus communication
  */
 CANManager::CANManager(VehicleController* vc, uint8_t pinRx, uint8_t pinTx)
-  : DeviceCAN(vc), m_pMsgVCU1(NULL), m_pinRx(pinRx), m_pinTx(pinTx)
+  : DeviceCAN(vc), m_pMsgVCU1(NULL), m_msgVCU1UpdateTime(0), m_msgVCU1Counter(0),
+    m_pinRx(pinRx), m_pinTx(pinTx)
 {
   // Instantiate messages
   m_pMsgVCU1 = new twai_message_t;
@@ -111,7 +112,10 @@ void CANManager::onValueChanged(Parameter* pParam)
         setBits(&(m_pMsgVCU1->data[4]), 32%8, 1, (uint8_t)(vehicleReady.getVal()));
         break;
       case 106:
-        setBits(&(m_pMsgVCU1->data[4]), 33%8, 2, (uint8_t)(brakePositionMCU.getVal()));
+        {
+          bool pressed = brakePositionMCU.getVal() > BRAKE_THRESHOLD_PERCENT;
+          setBits(&(m_pMsgVCU1->data[4]), 33%8, 2, (uint8_t)(pressed));
+        }
         break;
       case 107:
         setBits(&(m_pMsgVCU1->data[4]), 35%8, 1, (uint8_t)(mainRelayConnected.getVal()));
@@ -134,6 +138,11 @@ void CANManager::onValueChanged(Parameter* pParam)
       default:
         break;
     }
+    // Update the rolling counter
+    if (millis() - m_msgVCU1UpdateTime > 10) m_msgVCU1Counter ++;
+    if (m_msgVCU1Counter > 0xf) m_msgVCU1Counter = 0;
+    setBits(&(m_pMsgVCU1->data[6]), 48%8, 4, m_msgVCU1Counter);
+    m_msgVCU1UpdateTime = millis();
     // Set the checksum
     m_pMsgVCU1->data[7] = 
       (uint8_t)(m_pMsgVCU1->data[0] + m_pMsgVCU1->data[1]
@@ -200,9 +209,10 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
       break;
     case 0x107:
       // MCU3
-      this->setDoubleValue(&motorDCVoltage, (pMsg->data[0]*256 + pMsg->data[1]) * 0.01);
-      this->setDoubleValue(&motorDCCurrent, (pMsg->data[2]*256 + pMsg->data[3]) * 0.01);
-      this->setDoubleValue(&motorPhaseCurrent, (pMsg->data[4]*256 + pMsg->data[5]) * 0.01);
+      // round currents and voltages to one decimal to reduce traffic
+      this->setDoubleValue(&motorDCVoltage, this->round((pMsg->data[0]*256 + pMsg->data[1]) * 0.01));
+      this->setDoubleValue(&motorDCCurrent, this->round((pMsg->data[2]*256 + pMsg->data[3]) * 0.01));
+      this->setDoubleValue(&motorPhaseCurrent, this->round((pMsg->data[4]*256 + pMsg->data[5]) * 0.01));
       break;
     case 0x103:
       // BMS1
@@ -227,7 +237,7 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
       break;
     default:
       // Print the message ID
-      PRINT("Unknown message received: 0x" + String(pMsg->identifier, HEX))
+      //PRINT("Unknown message received: 0x" + String(pMsg->identifier, HEX))
       break;
   }
 }
@@ -278,4 +288,15 @@ void CANManager::setBits(uint8_t* pByte, uint8_t lsb, uint8_t len, uint8_t val)
 bool CANManager::getBit(uint8_t* pByte, uint8_t bitNum)
 {
   return (bool)( (*pByte << (8 - bitNum%8) ) >> 7);
+}
+
+
+/** Helper function to round voltages and currents.
+ * Defaults to one decimal
+ * @param val:    double value to be rounded
+ * @return double rounded value
+ */
+double CANManager::round(double val)
+{
+  return static_cast<double>(static_cast<int>(val * 10 + 0.5)) / 10.0;
 }

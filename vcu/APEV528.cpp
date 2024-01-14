@@ -35,7 +35,7 @@ void APEV528::begin()
   this->setIntegerValue(&vcuMotorOperationMode, 0);
 
   // Start the MCU
-  digitalWrite(m_enablePin, LOW);   // Set LOW to enable relay
+  //digitalWrite(m_enablePin, LOW);   // Set LOW to enable relay
 }
 
 
@@ -76,9 +76,14 @@ void APEV528::onValueChanged(Parameter* pParamWithNewValue)
         }
         break;
       case 114:
-        // Switch motor off, if not on
+        // Switch motor off, if KL15 not on
         if (keyPosition.getVal() < 2) {
           this->setIntegerValue(&vcuMotorOperationMode, 0);
+          digitalWrite(m_enablePin, HIGH); // shutdown MCU
+        }
+        // start the MCU with KL15
+        else if (keyPosition.getVal() == 2) {
+          digitalWrite(m_enablePin, LOW);
         }
         // or start the motor
         else if (keyPosition.getVal() == 3) {
@@ -88,20 +93,23 @@ void APEV528::onValueChanged(Parameter* pParamWithNewValue)
       case 106:
         // Switch motor to regen, if brake pressed
         if (brakePositionMCU.getVal() > BRAKE_THRESHOLD_PERCENT) {
-          if (vcuMotorOperationMode.getVal() != 2) {
+          if (vcuMotorOperationMode.getVal() == 1) {
             setMotorRegen();
           }
         }
         // or back to running
         else if (brakePositionMCU.getVal() == 0) {
-          setMotorRunning();
+          if (vcuMotorOperationMode.getVal() == 2) {
+            setMotorRunning();
+          }
         }
         break;
       case 108:
         // Switch motor off, if not in forward or backward gear
-        if (gearLeverPosition.getVal() != 1 && gearLeverPosition.getVal() != 3) {
-          this->setIntegerValue(&vcuMotorOperationMode, 0);
-        }
+        // TODO: how to switch motor on again?
+        //if (gearLeverPosition.getVal() != 1 && gearLeverPosition.getVal() != 3) {
+        //  this->setIntegerValue(&vcuMotorOperationMode, 0);
+        //}
         break;
       case 107:
         // Switch motor off if main contactor not closed
@@ -111,12 +119,14 @@ void APEV528::onValueChanged(Parameter* pParamWithNewValue)
         // or switch it on, if it was waiting for the contactor
         else if (m_waitingForContactor) {
           m_waitingForContactor = false;
-          setMotorRunning();
+          //setMotorRunning();
         }
         break;
       case 120:
         // Switch motor to regen, if brake is pressed and regen just switched on
-        if (switchRecuOn.getVal() && brakePositionMCU.getVal() > BRAKE_THRESHOLD_PERCENT) {
+        if (switchRecuOn.getVal()
+            && vcuMotorOperationMode.getVal() == 1
+            && brakePositionMCU.getVal() > BRAKE_THRESHOLD_PERCENT) {
           setMotorRegen();
         }
         // or switch regen off, if it was activated

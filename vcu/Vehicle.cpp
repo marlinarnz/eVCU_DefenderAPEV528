@@ -199,18 +199,16 @@ void Vehicle::updateWarningLevel()
       || motorLVUnderVoltageWarning.getVal()
       || motorOpenPhaseFault.getVal()
       || motorWarningLevel.getVal() == 1
-      || batteryPackVoltage.getVal() < WARN_BATTERY_UNDERVOLTAGE_V
      ) // Conditions for warning level "Warning"
   { this->setIntegerValue(&vehicleWarningLevel, 1); }
-  else if (motorBodyTemp.getVal() > DERATE_MOTOR_OVERTEMP_C
+  if (motorBodyTemp.getVal() > DERATE_MOTOR_OVERTEMP_C
            || motorControllerTemp.getVal() > DERATE_MOTOR_OVERTEMP_C
            || motorBodyOverTempFault.getVal()
            || motorWarningLevel.getVal() == 2
            || auxRelayFault.getVal()
-           || batteryPackVoltage.getVal() < DERATE_BATTERY_UNDERVOLTAGE_V
           ) // Conditions for warning level "Derating"
   { this->setIntegerValue(&vehicleWarningLevel, 2); }
-  else if (motorDCOverCurrentFault.getVal()
+  if (motorDCOverCurrentFault.getVal()
            || motorOverTempFault.getVal()
            || motorWarningLevel.getVal() == 3
            || mainRelayFault.getVal()

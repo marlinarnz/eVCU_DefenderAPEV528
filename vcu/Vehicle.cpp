@@ -37,6 +37,8 @@ void Vehicle::begin()
 
   // Initialise vehicle Parameters
   this->setBooleanValue(&authenticationValid, true);
+  this->setBooleanValue(&batteryDischargeInhibit, false); // TODO: true
+  this->setBooleanValue(&batteryChargeInhibit, false); // TODO: true
   updateWarningLevel();
   updateVehicleReadiness();
 }
@@ -183,6 +185,9 @@ void Vehicle::updateVehicleReadiness()
  */
 void Vehicle::updateWarningLevel()
 {
+  // All good
+  this->setIntegerValue(&vehicleWarningLevel, 0);
+
   if (motorBodyTemp.getVal() > WARN_MOTOR_OVERTEMP_C
       || motorControllerTemp.getVal() > WARN_MOTOR_OVERTEMP_C
       || motorPhaseCurrentFault.getVal()
@@ -201,6 +206,7 @@ void Vehicle::updateWarningLevel()
       || motorWarningLevel.getVal() == 1
      ) // Conditions for warning level "Warning"
   { this->setIntegerValue(&vehicleWarningLevel, 1); }
+
   if (motorBodyTemp.getVal() > DERATE_MOTOR_OVERTEMP_C
            || motorControllerTemp.getVal() > DERATE_MOTOR_OVERTEMP_C
            || motorBodyOverTempFault.getVal()
@@ -208,12 +214,11 @@ void Vehicle::updateWarningLevel()
            || auxRelayFault.getVal()
           ) // Conditions for warning level "Derating"
   { this->setIntegerValue(&vehicleWarningLevel, 2); }
+
   if (motorDCOverCurrentFault.getVal()
            || motorOverTempFault.getVal()
            || motorWarningLevel.getVal() == 3
            || mainRelayFault.getVal()
           ) // Conditions for warning level "Emergency stop"
   { this->setIntegerValue(&vehicleWarningLevel, 3); }
-  else // All good
-  { this->setIntegerValue(&vehicleWarningLevel, 0); }
 }

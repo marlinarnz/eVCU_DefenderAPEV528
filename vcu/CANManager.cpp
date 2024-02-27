@@ -138,11 +138,6 @@ void CANManager::onValueChanged(Parameter* pParam)
       default:
         break;
     }
-    // Update the rolling counter
-    if (millis() - m_msgVCU1UpdateTime > 10) m_msgVCU1Counter ++;
-    if (m_msgVCU1Counter > 0xf) m_msgVCU1Counter = 0;
-    setBits(&(m_pMsgVCU1->data[6]), 48%8, 4, m_msgVCU1Counter);
-    m_msgVCU1UpdateTime = millis();
     // Set the checksum
     m_pMsgVCU1->data[7] = 
       (uint8_t)(m_pMsgVCU1->data[0] + m_pMsgVCU1->data[1]
@@ -240,6 +235,12 @@ void CANManager::onMsgRcv(twai_message_t* pMsg)
       //PRINT("Unknown message received: 0x" + String(pMsg->identifier, HEX))
       break;
   }
+  
+  // Update the rolling counter of send message
+  if (millis() - m_msgVCU1UpdateTime > 10) m_msgVCU1Counter ++;
+  if (m_msgVCU1Counter > 0xf) m_msgVCU1Counter = 0;
+  setBits(&(m_pMsgVCU1->data[6]), 48%8, 4, m_msgVCU1Counter);
+  m_msgVCU1UpdateTime = millis();
 }
 
 

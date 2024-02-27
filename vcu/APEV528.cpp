@@ -77,6 +77,7 @@ void APEV528::onValueChanged(Parameter* pParamWithNewValue)
         break;
       case 114:
         // Switch motor off, if KL15 not on
+        // TODO: KL15 is key position 1
         if (keyPosition.getVal() < 2) {
           this->setIntegerValue(&vcuMotorOperationMode, 0);
           digitalWrite(m_enablePin, HIGH); // shutdown MCU
@@ -105,11 +106,10 @@ void APEV528::onValueChanged(Parameter* pParamWithNewValue)
         }
         break;
       case 108:
-        // Switch motor off, if not in forward or backward gear
-        // TODO: how to switch motor on again?
-        //if (gearLeverPosition.getVal() != 1 && gearLeverPosition.getVal() != 3) {
-        //  this->setIntegerValue(&vcuMotorOperationMode, 0);
-        //}
+        // Switch motor off, if not in any gear
+        if (gearLeverPosition.getVal() == 0) {
+          this->setIntegerValue(&vcuMotorOperationMode, 0);
+        }
         break;
       case 107:
         // Switch motor off if main contactor not closed

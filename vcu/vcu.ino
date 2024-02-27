@@ -20,22 +20,32 @@
 #include <Switch.h>
 #include <Pedal.h>
 
+// Define pins
+#define PIN_CANRx             22
+#define PIN_CANTx             21
+#define PIN_MotorEnable       14
+#define PIN_RecuSwitch        25
+uint8_t PINS_GearLever[4] =   {15, 2, 25, 5};
+int     MODES_GearLever[4] =  {INPUT_PULLDOWN, INPUT_PULLDOWN, INPUT, INPUT_PULLDOWN};
+uint8_t PINS_Ignition[3] =    {13, 35, 34};
+int     MODES_Ignition[3] =   {INPUT_PULLDOWN, INPUT, INPUT};
+#define PIN_AuxContactor      26
+#define PIN_MainContactor     27
+#define PIN_Throttle          32
+#define PIN_Brake             33
+
 
 // Instantiate Devices
 DebugLogger     logger(&vc);
-CANManager      can(&vc, 22, 21);
+CANManager      can(&vc, PIN_CANRx, PIN_CANTx);
 Vehicle         vehicle(&vc);
-APEV528         motor(&vc, 14);
-uint8_t gearPins[4] = {15, 2, 25, 5};
-int gearModes[4] = {INPUT_PULLDOWN, INPUT_PULLDOWN, INPUT, INPUT_PULLDOWN};
-GearLever       gear(&vc, gearPins, gearModes, &gearLeverPosition);
-uint8_t ignitionPins[3] = {13, 35, 34};
-int ignitionModes[3] = {INPUT_PULLDOWN, INPUT, INPUT};
-IgnitionSwitch  ignition(&vc, ignitionPins, ignitionModes, &keyPosition, 50);
-Contactors      contactors(&vc, 27, 26, 1000, &mainRelayConnected, &auxiliaryRelayConnected, &keyPosition, &vehicleReady, 2, false);
-//Switch          recuSwitch(&vc, 25, INPUT, &switchRecuOn, 50);
-Pedal           throttle(&vc, 32, 10, &throttlePosition); // TODO: include discharge inhibit and BMS state = RUN (concatenate both BMS parameters to one ParameterBool ThrottleInhibit)
-Pedal           brake(&vc, 33, 10, &brakePositionMCU); // TODO: include charge inhibit and BMS state = RUN
+APEV528         motor(&vc, PIN_MotorEnable);
+//Switch          recuSwitch(&vc, PIN_RecuSwitch, INPUT, &switchRecuOn, 50);
+GearLever       gear(&vc, PINS_GearLever, MODES_GearLever, &gearLeverPosition);
+IgnitionSwitch  ignition(&vc, PINS_Ignition, MODES_Ignition, &keyPosition, 50);
+Contactors      contactors(&vc, PIN_MainContactor, PIN_AuxContactor, 1000, &mainRelayConnected, &auxiliaryRelayConnected, &keyPosition, &vehicleReady, 2, false);
+Pedal           throttle(&vc, PIN_Throttle, 10, &throttlePosition); // TODO: include discharge inhibit and BMS state = RUN (concatenate both BMS parameters to one ParameterBool ThrottleInhibit)
+Pedal           brake(&vc, PIN_Brake, 10, &brakePositionMCU); // TODO: include charge inhibit and BMS state = RUN
 
 
 void setup() {

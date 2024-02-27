@@ -36,8 +36,7 @@ void GearLever::begin()
   // Start tasks
   this->startTasks(4096, 8192);
   // Init the switch position
-  //this->setIntegerValue(m_pParam, getLeverPosition());
-  this->setIntegerValue(m_pParam, 4);
+  this->setIntegerValue(m_pParam, getLeverPosition());
 }
 
 

@@ -117,7 +117,7 @@ void loop() {
   // Polling
   MCP2515::ERROR err = CAN.readMessage(&msgIn);
   if (MCP2515::ERROR_OK == err) {
-    printMessage(msgIn.can_id, msgIn.can_dlc, msgIn.data);
+    //printMessage(msgIn.can_id, msgIn.can_dlc, msgIn.data);
     if (msgIn.can_id == 0x101) {
 
       // Check contactor status
@@ -137,14 +137,17 @@ void loop() {
       // Now set the precharge message accordingly
       if (!mainConn && auxConn) {
         msgOut1.data[3] = 0x00;
+        Serial.println("Precharge not finished");
       }
       else if (mainConn && !auxConn) {
         msgOut1.data[3] = 0x01 << 4;
+        Serial.println("Precharge finished");
       }
 
       // Reset precharge message when key position is acc
       if ((msgIn.data[5] >> 6 ) & 0x3 < 2) {
         msgOut1.data[3] = 0x00;
+        Serial.println("Precharge not finished");
       }
     }
   }

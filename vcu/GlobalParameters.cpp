@@ -19,6 +19,7 @@ ParameterBool   auxiliaryRelayConnected(115);
 ParameterBool   switchRecuOn(120);
 ParameterBool   mainRelayFault(121);
 ParameterBool   auxRelayFault(122);
+ParameterBool   throttleInhibit(123);
 
 // The MCU's Parameters
 // Message ID 0x107

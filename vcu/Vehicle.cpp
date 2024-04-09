@@ -39,6 +39,7 @@ void Vehicle::begin()
   this->setBooleanValue(&authenticationValid, true);
   this->setBooleanValue(&batteryDischargeInhibit, false); // TODO: true
   this->setBooleanValue(&batteryChargeInhibit, false); // TODO: true
+  this->setBooleanValue(&throttleInhibit, true); // TODO: logic
   updateWarningLevel();
   updateVehicleReadiness();
 }

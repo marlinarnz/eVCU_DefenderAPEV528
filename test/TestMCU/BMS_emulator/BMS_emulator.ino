@@ -13,12 +13,14 @@ MCP2515 CAN(10);			// Set SPI Chip Select
 struct can_frame msgIn;
 struct can_frame msgOut1;
 struct can_frame msgOut2;
+struct can_frame msgOut3;
 
 // timers for outgoing messages
 long msg1Time = 0;
 long msg2Time = 0;
-int msg1Interval, msg2Interval;
-int msg1Counter, msg2Counter;
+long msg3Time = 0;
+int msg1Interval, msg2Interval, msg3Interval;
+int msg1Counter, msg2Counter, msg3Counter;
 
 // Interactive pins
 const int PIN_IRQ = 2;
@@ -69,25 +71,37 @@ void setup() {
   msgOut1.can_id  = 0x1A0; // BMS
   msgOut1.can_dlc = 8;
   msgOut1.data[0] = 0x00; // warning level, status, main contactors
-  msgOut1.data[1] = 0x00; // SOC
-  msgOut1.data[2] = 0x00; // SOH
-  msgOut1.data[3] = 0x00; // AC, precharge relays, mode
-  msgOut1.data[4] = 0x00; // max discharge (14 bits)
-  msgOut1.data[5] = 0x00; // max discharge continued, contactor adherence
+  msgOut1.data[1] = 0xC6; // SOC
+  msgOut1.data[2] = 0xC6; // SOH
+  msgOut1.data[3] = 0b11000000; // AC, precharge relays, mode
+  msgOut1.data[4] = 0xFF; // max discharge (14 bits)
+  msgOut1.data[5] = 0x0F; // max discharge continued, contactor adherence
   msgOut1.data[6] = 0x00; // alarms and rolling counter
   msgOut1.data[7] = 0x00; // checksum
 
   msg2Interval = 50;
   msgOut2.can_id  = 0x431; // park break
   msgOut2.can_dlc = 8;
-  msgOut2.data[0] = 0x00; // park break
-  msgOut2.data[1] = 0x00;
+  msgOut2.data[0] = 0x00; // park break, counter
+  msgOut2.data[1] = 0x63; // SOC
   msgOut2.data[2] = 0x00;
   msgOut2.data[3] = 0x00;
   msgOut2.data[4] = 0x00;
   msgOut2.data[5] = 0x00;
   msgOut2.data[6] = 0x00;
   msgOut2.data[7] = 0x00;
+
+  msg3Interval = 20;
+  msgOut3.can_id  = 0x102; // VCU2
+  msgOut3.can_dlc = 8;
+  msgOut3.data[0] = 0x00;
+  msgOut3.data[1] = 0x00;
+  msgOut3.data[2] = 0x00;
+  msgOut3.data[3] = 0x00;
+  msgOut3.data[4] = 0x00;
+  msgOut3.data[5] = 0xFF; // max torque request
+  msgOut3.data[6] = 0x00; // counter
+  msgOut3.data[7] = 0xFF ^ 0xFF; // checksum
 }
 
 
@@ -137,17 +151,16 @@ void loop() {
       // Now set the precharge message accordingly
       if (!mainConn && auxConn) {
         msgOut1.data[3] = 0x00;
-        Serial.println("Precharge not finished");
       }
       else if (mainConn && !auxConn) {
-        msgOut1.data[3] = 0x01 << 4;
-        Serial.println("Precharge finished");
+        msgOut1.data[3] = 0b11010000;
+        msgOut1.data[0] = 0b01110000;
       }
 
       // Reset precharge message when key position is acc
       if ((msgIn.data[5] >> 6 ) & 0x3 < 2) {
-        msgOut1.data[3] = 0x00;
-        Serial.println("Precharge not finished");
+        msgOut1.data[3] = 0b11000000;
+        msgOut1.data[0] = 0x00;
       }
     }
   }
@@ -156,13 +169,30 @@ void loop() {
   if (millis() - msg1Time > msg1Interval) {
     msg1Counter++;
     msgOut1.data[6] = msgOut1.data[6] + 1;
-    if (msgOut1.data[6] > 0xf) {msgOut1.data[6] = 0;}
+    if (msgOut1.data[6] >= 0xf) {msgOut1.data[6] = 0;}
     msgOut1.data[7] = (uint8_t)((msgOut1.data[0] + msgOut1.data[1] + msgOut1.data[2] + msgOut1.data[3] + msgOut1.data[4] + msgOut1.data[5] + msgOut1.data[6]) ^ 0xFF );
     CAN.sendMessage(&msgOut1);
     msg1Time = millis();
   }
+
   if (millis() - msg2Time > msg2Interval) {
+    if (msg2Counter) {
+      msgOut2.data[0] = 0b00100000;
+      msg2Counter = 0;
+    } else {
+      msgOut2.data[0] = 0b00000000;
+      msg2Counter = 1;
+    }
     CAN.sendMessage(&msgOut2);
     msg2Time = millis();
+  }
+  
+  if (millis() - msg3Time > msg3Interval) {
+    msg3Counter++;
+    msgOut3.data[6] = msgOut3.data[6] + 1;
+    if (msgOut3.data[6] >= 0xf) {msgOut3.data[6] = 0;}
+    msgOut3.data[7] = (uint8_t)((msgOut3.data[0] + msgOut3.data[1] + msgOut3.data[2] + msgOut3.data[3] + msgOut3.data[4] + msgOut3.data[5] + msgOut3.data[6]) ^ 0xFF );
+    CAN.sendMessage(&msgOut3);
+    msg3Time = millis();
   }
 }

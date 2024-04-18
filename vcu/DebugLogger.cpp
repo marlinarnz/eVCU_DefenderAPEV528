@@ -24,7 +24,25 @@ void DebugLogger::begin()
   this->registerForValueChanged(201);
   this->registerForValueChanged(204);
   this->registerForValueChanged(205);
+  this->registerForValueChanged(206);
+  this->registerForValueChanged(207);
+  this->registerForValueChanged(208);
+  this->registerForValueChanged(209);
+  this->registerForValueChanged(210);
+  this->registerForValueChanged(211);
+  this->registerForValueChanged(212);
+  this->registerForValueChanged(213);
+  this->registerForValueChanged(214);
+  this->registerForValueChanged(215);
+  this->registerForValueChanged(216);
+  this->registerForValueChanged(217);
+  this->registerForValueChanged(218);
+  this->registerForValueChanged(219);
+  this->registerForValueChanged(220);
   this->registerForValueChanged(221);
+  this->registerForValueChanged(222);
+  this->registerForValueChanged(223);
+  this->registerForValueChanged(225);
   this->registerForValueChanged(227);
   this->registerForValueChanged(228);
   this->registerForValueChanged(229);
@@ -58,7 +76,25 @@ void DebugLogger::shutdown()
   this->unregisterForValueChanged(201);
   this->unregisterForValueChanged(204);
   this->unregisterForValueChanged(205);
+  this->unregisterForValueChanged(206);
+  this->unregisterForValueChanged(207);
+  this->unregisterForValueChanged(208);
+  this->unregisterForValueChanged(209);
+  this->unregisterForValueChanged(210);
+  this->unregisterForValueChanged(211);
+  this->unregisterForValueChanged(212);
+  this->unregisterForValueChanged(213);
+  this->unregisterForValueChanged(214);
+  this->unregisterForValueChanged(215);
+  this->unregisterForValueChanged(216);
+  this->unregisterForValueChanged(217);
+  this->unregisterForValueChanged(218);
+  this->unregisterForValueChanged(219);
+  this->unregisterForValueChanged(220);
   this->unregisterForValueChanged(221);
+  this->unregisterForValueChanged(222);
+  this->unregisterForValueChanged(223);
+  this->unregisterForValueChanged(225);
   this->unregisterForValueChanged(227);
   this->unregisterForValueChanged(228);
   this->unregisterForValueChanged(229);
@@ -136,8 +172,67 @@ void DebugLogger::onValueChanged(Parameter* pParamWithNewValue)
       case 205:
         PRINT("Controller temperature: " + String(motorControllerTemp.getVal()))
         break;
+      case 206:
+        PRINT("motorDCOverCurrentFault: " + String(motorDCOverCurrentFault.getVal()))
+        break;
+      case 207:
+        PRINT("motorPhaseCurrentFault: " + String(motorPhaseCurrentFault.getVal()))
+        break;
+      case 208:
+        PRINT("motorOverTempFault: " + String(motorOverTempFault.getVal()))
+        break;
+      case 209:
+        PRINT("motorRotationTransformFault: " + String(motorRotationTransformFault.getVal()))
+        break;
+      case 210:
+        PRINT("motorPhaseCurrentSensorFault: " + String(motorPhaseCurrentSensorFault.getVal()))
+        break;
+      case 211:
+        PRINT("motorOverSpeedFault: " + String(motorOverSpeedFault.getVal()))
+        break;
+      case 212:
+        PRINT("motorBodyOverTempFault: " + String(motorBodyOverTempFault.getVal()))
+        break;
+      case 213:
+        PRINT("motorDCOverVoltageFault: " + String(motorDCOverVoltageFault.getVal()))
+        break;
+      case 214:
+        PRINT("motorBodyUnderTempFault: " + String(motorBodyUnderTempFault.getVal()))
+        break;
+      case 215:
+        PRINT("motorSystemFault: " + String(motorSystemFault.getVal()))
+        break;
+      case 216:
+        PRINT("motorTempSensorFault: " + String(motorTempSensorFault.getVal()))
+        break;
+      case 217:
+        PRINT("motorBodyTempSensorFault: " + String(motorBodyTempSensorFault.getVal()))
+        break;
+      case 218:
+        PRINT("motorDCVoltageSensorFault: " + String(motorDCVoltageSensorFault.getVal()))
+        break;
+      case 219:
+        PRINT("motorDCUnderVoltageWarning: " + String(motorDCUnderVoltageWarning.getVal()))
+        break;
+      case 220:
+        PRINT("motorLVUnderVoltageWarning: " + String(motorLVUnderVoltageWarning.getVal()))
+        break;
       case 221:
         PRINT("MCU warning level (0-3): " + String(motorWarningLevel.getVal()))
+        break;
+      case 222:
+        PRINT("motorOpenPhaseFault: " + String(motorOpenPhaseFault.getVal()))
+        break;
+      case 223:
+        PRINT("motorStall: " + String(motorStall.getVal()))
+        break;
+      case 225:
+        if (motorSpeed.getVal() > 10 && !m_motorRotating) {
+          m_motorRotating = true;
+          PRINT("Motor is spinning")
+        } else if (motorSpeed.getVal() == 0 && m_motorRotating) {
+          m_motorRotating = false;
+        }
         break;
       case 227:
         PRINT("Maximum motor torque: " + String(motorMaxTorque.getVal()))

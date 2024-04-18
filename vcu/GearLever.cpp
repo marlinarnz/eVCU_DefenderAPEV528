@@ -80,7 +80,7 @@ int GearLever::getLeverPosition()
   if (digitalRead(m_pins[2]) == HIGH) {
     return 3;
   } else {
-    return 4;
+    return 2;
   }
 }
 

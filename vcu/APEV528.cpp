@@ -35,7 +35,7 @@ void APEV528::begin()
   this->setIntegerValue(&vcuMotorOperationMode, 0);
 
   // Start the MCU
-  //digitalWrite(m_enablePin, LOW);   // Set LOW to enable relay
+  //digitalWrite(m_enablePin, LOW);   // TODO: Set LOW to enable relay
 }
 
 
@@ -77,7 +77,7 @@ void APEV528::onValueChanged(Parameter* pParamWithNewValue)
         break;
       case 114:
         // Switch motor off, if KL15 not on
-        // TODO: KL15 is key position 1
+        // TODO: KL15 is key pos. 1
         if (keyPosition.getVal() < 2) {
           this->setIntegerValue(&vcuMotorOperationMode, 0);
           digitalWrite(m_enablePin, HIGH); // shutdown MCU
@@ -119,7 +119,7 @@ void APEV528::onValueChanged(Parameter* pParamWithNewValue)
         // or switch it on, if it was waiting for the contactor
         else if (m_waitingForContactor) {
           m_waitingForContactor = false;
-          //setMotorRunning();
+          //setMotorRunning(); // TODO
         }
         break;
       case 120:

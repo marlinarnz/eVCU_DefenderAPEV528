@@ -43,7 +43,7 @@ APEV528         motor(&vc, PIN_MotorEnable);
 //Switch          currently used for gear lever: recuSwitch(&vc, PIN_RecuSwitch, INPUT, &switchRecuOn, 50);
 GearLever       gear(&vc, PINS_GearLever, MODES_GearLever, &gearLeverPosition);
 IgnitionSwitch  ignition(&vc, PINS_Ignition, MODES_Ignition, &keyPosition, 50);
-Contactors      contactors(&vc, PIN_MainContactor, PIN_AuxContactor, 1000, &mainRelayConnected, &auxiliaryRelayConnected, &keyPosition, &vehicleReady, 2, false);
+Contactors      contactors(&vc, PIN_MainContactor, PIN_AuxContactor, 1000, &mainRelayConnected, &auxiliaryRelayConnected, &keyPosition, &vehicleReady, 2, 0, false);
 Pedal           throttle(&vc, PIN_Throttle, 10, &throttlePosition, &throttleInhibit);
 Pedal           brake(&vc, PIN_Brake, 10, &brakePositionMCU, &batteryChargeInhibit);
 

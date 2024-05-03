@@ -204,21 +204,19 @@ void Vehicle::updateWarningLevel()
       || motorDCUnderVoltageWarning.getVal()
       || motorLVUnderVoltageWarning.getVal()
       || motorOpenPhaseFault.getVal()
-      || motorWarningLevel.getVal() == 1
+      || motorWarningLevel.getVal() >= 1
      ) // Conditions for warning level "Warning"
   { this->setIntegerValue(&vehicleWarningLevel, 1); }
 
   if (motorBodyTemp.getVal() > DERATE_MOTOR_OVERTEMP_C
            || motorControllerTemp.getVal() > DERATE_MOTOR_OVERTEMP_C
            || motorBodyOverTempFault.getVal()
-           || motorWarningLevel.getVal() == 2
            || auxRelayFault.getVal()
           ) // Conditions for warning level "Derating"
   { this->setIntegerValue(&vehicleWarningLevel, 2); }
 
   if (motorDCOverCurrentFault.getVal()
            || motorOverTempFault.getVal()
-           || motorWarningLevel.getVal() == 3
            || mainRelayFault.getVal()
           ) // Conditions for warning level "Emergency stop"
   { this->setIntegerValue(&vehicleWarningLevel, 3); }

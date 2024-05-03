@@ -1,0 +1,25 @@
+Brake pressed
+Brake released
+Gear lever position (0-4: Default, R, N, D, P): 2
+Key position (off, aux, on, cranck): 3
+Operation command (0-2: Standby, Drive, Regen): 1
+Motor operation mode (0-2: standby, torque, speed): 1
+Key position (off, aux, on, cranck): 2
+Brake pressed
+Brake released
+Gear lever position (0-4: Default, R, N, D, P): 3
+Motor is spinning
+Motor direction (0-3: standby, forward, backward, error): 1
+Motor direction (0-3: standby, forward, backward, error): 0
+Gear lever position (0-4: Default, R, N, D, P): 2
+Key position (off, aux, on, cranck): 1
+Operation command (0-2: Standby, Drive, Regen): 0
+Maximum motor torque: 64.68
+Motor operation mode (0-2: standby, torque, speed): 0
+Maximum motor torque: 0.00
+Motor operation mode (0-2: standby, torque, speed): 1
+Motor operation mode (0-2: standby, torque, speed): 0
+Motor state (0-4: standby, precharge, ready, running, shutdown): 4
+MCU warning level (0-3): 0
+motorOpenPhaseFault: 0
+VCU warning level (0-3): 0
